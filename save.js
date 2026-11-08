@@ -3101,6 +3101,14 @@ function decState(s) {
     }
   }
 
+  if(save_version < 262144*2+64*18+5 && state.squirrel_evolution == 2) {
+    // the changes are only after you reached this stage
+    if(state.squirrel_stages[8].num[1] > 0) {
+      showMessage('One free squirrel respec token given due to squirrel upgrade changes');
+      state.squirrel_respec_tokens++; // free respec token due to upgrade change
+    }
+  }
+
   if(save_version < 4096*1+78) {
     // some ethereal field crops got cheaper, refund if bought
     var num_berry = 0;

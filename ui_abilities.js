@@ -104,6 +104,7 @@ var prev_td_challenge = -1; // idem, but for 'go' button for tower defense chall
 var prev_td_gameover = -1; // idem, but for 'go' button for tower defense challenge changing into 'game over'
 
 var last_seen_havePerma = -1; // to update tooltips/action names when this changes
+var last_seen_season = -1; // to change to infernal weather when in infernal season
 
 // returns the field cell of the lowest health brassica in the basic field, or undefined if none.
 // returns a field with f.index == FIELD_REMAINDER if there are remainders
@@ -134,7 +135,13 @@ function updateAbilitiesUI() {
   var havePerma_changed = (havePerma != last_seen_havePerma);
   last_seen_havePerma = havePerma;
 
-  if(sunbutton && (!state.upgrades[upgrade_sununlock].count || havePerma_changed)) {
+  var season = getSeason();
+  var season_changed = (season != last_seen_season);
+  last_seen_season = season;
+
+  var something_changed = havePerma_changed || season_changed;
+
+  if(sunbutton && (!state.upgrades[upgrade_sununlock].count || something_changed)) {
     sunbutton.removeSelf(topFlex);
     suntimerflex.removeSelf(topFlex);
     sunbutton = undefined;
@@ -155,7 +162,7 @@ function updateAbilitiesUI() {
 
     var canvasFlex = new Flex(sunbutton, 0, 0, 1, 1);
     var canvas = createCanvas('0%', '0%', '100%', '100%', canvasFlex.div);
-    renderImage(image_sun, canvas);
+    renderImage(getSeason() == 5 ? image_sun_infernal : image_sun, canvas);
 
     registerAction(sunbutton.div, function(shift, ctrl) {
       if(shift) {
@@ -207,7 +214,7 @@ function updateAbilitiesUI() {
 
   //////////////////////////////////////////////////////////////////////////////
 
-  if(mistbutton && (!state.upgrades[upgrade_mistunlock].count || havePerma_changed)) {
+  if(mistbutton && (!state.upgrades[upgrade_mistunlock].count || something_changed)) {
     mistbutton.removeSelf(topFlex);
     misttimerflex.removeSelf(topFlex);
     mistbutton = undefined;
@@ -227,7 +234,7 @@ function updateAbilitiesUI() {
 
     var canvasFlex = new Flex(mistbutton, 0, 0, 1, 1);
     var canvas = createCanvas('0%', '0%', '100%', '100%', canvasFlex.div);
-    renderImage(image_mist, canvas);
+    renderImage(getSeason() == 5 ? image_mist_infernal : image_mist, canvas);
 
     registerAction(mistbutton.div, function(shift, ctrl) {
       if(shift) {
@@ -280,7 +287,7 @@ function updateAbilitiesUI() {
   //////////////////////////////////////////////////////////////////////////////
 
 
-  if(rainbowbutton && (!state.upgrades[upgrade_rainbowunlock].count || havePerma_changed)) {
+  if(rainbowbutton && (!state.upgrades[upgrade_rainbowunlock].count || something_changed)) {
     rainbowbutton.removeSelf(topFlex);
     rainbowtimerflex.removeSelf(topFlex);
     rainbowbutton = undefined;
@@ -300,7 +307,7 @@ function updateAbilitiesUI() {
 
     var canvasFlex = new Flex(rainbowbutton, 0, 0, 1, 1);
     var canvas = createCanvas('0%', '0%', '100%', '100%', canvasFlex.div);
-    renderImage(image_rainbow, canvas);
+    renderImage(getSeason() == 5 ? image_rainbow_infernal : image_rainbow, canvas);
 
     registerAction(rainbowbutton.div, function(shift, ctrl) {
       if(shift) {

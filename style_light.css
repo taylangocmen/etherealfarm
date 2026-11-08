@@ -139,6 +139,11 @@ a:visited {
   background-color: #eef;
 }
 
+.efSeasonBgInfernal {
+  background-color: #fdd;
+  color: #a00;
+}
+
 .efUpgradeChip {
   background-color: #eee;
   border: 1px solid #000;

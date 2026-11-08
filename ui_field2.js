@@ -437,7 +437,8 @@ function field2CellTooltipFun(x, y, div) {
     result += '<br><br>Twigs required for next level: </b>' + (twigs_req.twigs.sub(state.res.twigs)).toString() + ' of ' + twigs_req.toString() + ' (have ' + state.res.twigs.toString() + ', ' + nextlevelprogress.toPercentString() + ')';
     var boost = getEtherealTreeNeighborBoost();
     if(boost.neqr(0)) {
-      if(state.squirrel_upgrades[upgradesq_ethtree_diag].count) result += '<br><br>Boosting non-lotus neighbors orthogonally and diagonally: ' + boost.toPercentString();
+      if(state.squirrel_upgrades[upgradesq_ethtree_lotus].count) result += '<br><br>Boosting all neighbors orthogonally and diagonally: ' + boost.toPercentString();
+      else if(state.squirrel_upgrades[upgradesq_ethtree_diag].count) result += '<br><br>Boosting non-lotus neighbors orthogonally and diagonally: ' + boost.toPercentString();
       else result += '<br><br>Boosting non-lotus neighbors orthogonally but not diagonally: ' + boost.toPercentString();
     }
   }

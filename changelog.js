@@ -30,6 +30,15 @@ function getChangeLog() {
     }
   }
 
+  text += '0.18.5 (2026-11-08)';
+  text += '<br/>• Reorganized and buffed certain squirrel upgrades of the bottom half section of squirrel evolution II. One free squirrel respec token given to those affected to allow respeccing those upgrades.';
+  text += '<br/>• Added two more ethereal "extra fruit slot" upgrades.';
+  text += '<br/>• Increased contrast of non-affordable skills on green buttons in fruit dialogs, for readability.';
+  text += '<br/>• Increased visiblity of a few combinations of border color with fruit.';
+  text += '<br/>• The weather icons during the infernal challenge get a different color. This is a visual effect only, no change to the actual weather effects.';
+  text += '<br/>• Added a forgotten CSS style to the top resource display (which had a style for all other seasons) during infernal challenges.';
+  text += '<br/><br/>';
+
   text += '0.18.4 (2026-09-19)';
   text += '<br/>• Added a new ethereal crop for ethereal tree level 32.';
   text += '<br/>• Decreased the difficulty multiplier for repeating the igniferous challenge from 250x to 10x. This allows repeating it (and getting its reward, which is unchanged) more often.';

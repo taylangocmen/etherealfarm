@@ -669,6 +669,8 @@ function fillFruitDialog(dialog, f, opt_selected) {
   var selected = (opt_selected == undefined) ? -1  : opt_selected; // the selected ability for details and upgrade button
   var flexes = [];
 
+  var enhance = getFruitAbilityFor(f, FRUIT_GROW_ENHANCE, 0);
+
   var y = 0.26;
   var h = 0.05;
   for(var i = 0; i < f.abilities.length; i++) {
@@ -677,8 +679,12 @@ function fillFruitDialog(dialog, f, opt_selected) {
     var a = f.abilities[i];
     var level = f.levels[i];
 
-    text = upper(f.abilityToString(i));
-    text += ' (' + getFruitBoost(undefined, a, level, f.tier).toPercentString() + ')';
+    var percent = getFruitBoost(undefined, a, level, f.tier, undefined, undefined, 0).toPercentString();
+    if(enhance && a != FRUIT_GROW_ENHANCE) {
+      percent += ' 🡒 ' + getFruitBoost(f, a, level, f.tier, undefined, undefined, 0).toPercentString();
+    }
+
+    text = upper(f.abilityToString(i)) + ' (' + percent + ')';
 
     centerText2(flex.div);
 
@@ -855,8 +861,9 @@ function fillFruitDialog(dialog, f, opt_selected) {
         flexes[i].div.style.color = '#0008';
         flexes[i].div.style.textShadow = '2px 0 #fff8, 0 2px #fff8';
       } else {
-        flexes[i].div.style.color = afford ? '#000' : '#797';
+        flexes[i].div.style.color = afford ? '#000' : '#666';
         flexes[i].div.style.textShadow = '';
+        //flexes[i].div.style.textShadow = afford ? '' : '2px 0 #fff8, 0 2px #fff8';
       }
     }
 
@@ -1029,6 +1036,8 @@ function showStorageFruitSourceDialog() {
   if(state.upgrades2[upgrade2_extra_fruit_slot5].count) num_ethereal_upgrades++;
   if(state.upgrades2[upgrade2_extra_fruit_slot6].count) num_ethereal_upgrades++;
   if(state.upgrades2[upgrade2_extra_fruit_slot7].count) num_ethereal_upgrades++;
+  if(state.upgrades2[upgrade2_extra_fruit_slot8].count) num_ethereal_upgrades++;
+  if(state.upgrades2[upgrade2_extra_fruit_slot9].count) num_ethereal_upgrades++;
   if(num_ethereal_upgrades > 0) {
     text += ' • ' + num_ethereal_upgrades + ': ethereal upgrades';
     text += '<br/>';
@@ -1045,10 +1054,16 @@ function showStorageFruitSourceDialog() {
 function styleFruitChip(flex, f) {
   var ratio = state.res.essence
   flex.div.style.backgroundColor = tierColors_BG[f.tier] + '7';
+
+  var boxshadow = '';
+
   // see also array fruitmarkcolornames
   if(f.mark) {
     var color = fruitmarkcolors[f.mark] || '#fff';
-    flex.div.style.border = '3px solid ' + color;
+    flex.div.style.border = '4px solid ' + color;
+    // increase visibility in a few cases where the border and fruit color are similar
+    if((f.tier == 4 || f.tier == 5 || f.tier == 11) && (f.mark == 2 || f.mark == 5)) boxshadow += 'inset 0 0 0 1px #000';
+    if((f.tier == 8 && f.mark == 4) || (f.tier == 9 && f.mark == 3) || (f.tier == 1 && f.mark == 7)) boxshadow += 'inset 0 0 0 1px #000';
   } else if(f.name || (f.fuses && f.type <= 4)) {
     //var color = f.name ? '#999' : '#777';
     var color = '#999';
@@ -1057,13 +1072,18 @@ function styleFruitChip(flex, f) {
     //flex.div.style.border = '1px solid black';
   }
   if(lastTouchedFruit == f) {
-    flex.div.style.boxShadow = '0px 0px 16px #000';
+    if(boxshadow) boxshadow += ', ';
+    boxshadow += '0px 0px 16px #000';
+    //flex.div.style.boxShadow = '0px 0px 16px #000';
   } else if(lastTouchedFruit2 == f) {
-    flex.div.style.boxShadow = '0px 0px 16px #800';
+    if(boxshadow) boxshadow += ', ';
+    boxshadow += '0px 0px 16px #800';
+    //flex.div.style.boxShadow = '0px 0px 16px #800';
   } else {
-    flex.div.style.boxShadow = '';
+    //flex.div.style.boxShadow = '';
   }
   flex.div.style.outline = '1px solid black';
+  flex.div.style.boxShadow = boxshadow;
 }
 
 var fruitmarkcolors = ['#000', '#f00', '#dc0', '#4c4', '#66f', '#fff', '#f80', '#840', '#b0f'];

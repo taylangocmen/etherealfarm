@@ -168,6 +168,11 @@ body {
   color: #dde;
 }
 
+.efSeasonBgInfernal {
+  background-color: #800;
+  color: #f88;
+}
+
 .efUpgradeChip {
   background-color: #333;
   border: 1px solid #990;

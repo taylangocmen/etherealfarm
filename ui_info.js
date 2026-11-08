@@ -201,7 +201,7 @@ function prodBreakdownHypo() {
   }
 }
 
-var season_styles = [ 'efSeasonBgSpring', 'efSeasonBgSummer', 'efSeasonBgAutumn', 'efSeasonBgWinter' ];
+var season_styles = [ 'efSeasonBgSpring', 'efSeasonBgSummer', 'efSeasonBgAutumn', 'efSeasonBgWinter', '', 'efSeasonBgInfernal'];
 
 
 
@@ -415,7 +415,8 @@ function getResourceDetails(index) {
         text += 'Production stats below represent the original seeds production of crops, which is consumed by mushroom towers. Those production numbers are not the seed income and don\'t actually go to your stacks however, since seed income is gained by exterminating pests.';
         text += '<br/><br/>';
       }
-      if(!res_gain.near(res_gain_pos, 0.002)) {
+      //if(!res_gain.near(res_gain_pos, 0.002)) {
+      if(gain.spores.neqr(0)) {
         text += 'Production (' + name + '/s):<br/>';
         text += '• To stacks: ' + res_gain.toString() + '/s (= going to your resources)<br/>';
         text += '• To consumers: ' + (res_gain_pos.sub(res_gain)).toString() + '/s (= going to neighboring mushrooms)<br/>';

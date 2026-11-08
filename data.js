@@ -4482,6 +4482,9 @@ Crop2.prototype.getEtherealBoost = function(f, breakdown) {
   if(f && this.type == CROPTYPE_LOTUS) {
     var num_mistle = 0;
     var num_automaton = 0;
+    var num_tree = 0;
+
+    var tree_diag = state.squirrel_upgrades[upgradesq_ethtree_diag].count || state.squirrel_upgrades[upgradesq_ethtree_lotus].count;
 
     for(var dir = 0; dir < 8; dir++) { // get the neighbors N,E,S,W,NE,SE,SW,NW
       var x2 = f.x + ((dir == 1 || dir == 4 || dir == 5) ? 1 : ((dir == 3 || dir == 6 || dir == 7) ? -1 : 0));
@@ -4497,21 +4500,32 @@ Crop2.prototype.getEtherealBoost = function(f, breakdown) {
           num_automaton++;
         }
       }
+      if((dir < 4 || tree_diag) && (n.index == FIELD_TREE_TOP || n.index == FIELD_TREE_BOTTOM)) {
+        num_tree++;
+      }
     }
 
-    if((num_mistle && haveEtherealMistletoeUpgrade(mistle_upgrade_lotus_neighbor) || (num_automaton && haveEtherealMistletoeUpgrade(mistle_upgrade_automaton_florality)))) {
-      // num_mistle itself is not taken into account: mistletoe bonus does not stack with each other, neither additively, nor multiplicatively.
-      var mistleboost = num_mistle ? getEtherealMistletoeLotusNeighborBoost() : new Num(0);
-      var automatonboost = num_automaton ? getEtherealAutomatonLotusNeighborBoost() : new Num(0);
-      var totalmul = mistleboost.add(automatonboost).addr(1);
+    // num_mistle itself is not taken into account: mistletoe bonus does not stack with each other, neither additively, nor multiplicatively.
+    var do_mistle = !!num_mistle && haveEtherealMistletoeUpgrade(mistle_upgrade_lotus_neighbor);
+    var do_automaton = !!num_automaton && haveEtherealMistletoeUpgrade(mistle_upgrade_automaton_florality);
+    var do_tree = !!num_tree && state.squirrel_upgrades[upgradesq_ethtree_lotus].count;
+
+    if(do_mistle || do_automaton || do_tree) {
+      var mistleboost = do_mistle ? getEtherealMistletoeLotusNeighborBoost() : new Num(0);
+      var automatonboost = do_automaton ? getEtherealAutomatonLotusNeighborBoost() : new Num(0);
+      var treeboost = do_tree ? getEtherealTreeLotusNeighborBoost() : new Num(0);
+      //var totalmul = mistleboost.add(automatonboost).add(treeboost).addr(1);
+      var totalmul = mistleboost.add(automatonboost).addr(1).mul(treeboost.addr(1)); // the tree one is multiplicative to the others instead of additive because it will never be a very high number like the others (it's from the squirrel tree, not an infinite mistletoe upgrade)
       result.mulInPlace(totalmul);
       if(breakdown) {
-        if(!num_automaton) {
+        if(!do_automaton && !do_tree) {
           breakdown.push(['mistletoe neighbor', true, totalmul, result.clone()]);
-        } else if(!num_mistle) {
+        } else if(!do_mistle && !do_tree) {
           breakdown.push(['automaton neighbor', true, totalmul, result.clone()]);
+        } else if(!do_mistle && !do_automaton) {
+          breakdown.push(['tree neighbor', true, totalmul, result.clone()]);
         } else {
-          breakdown.push(['mistletoe and automaton neighbors', true, totalmul, result.clone()]);
+          breakdown.push(['mistletoe, automaton and/or tree neighbors', true, totalmul, result.clone()]);
         }
       }
     }
@@ -4541,6 +4555,12 @@ function getEtherealTreeNeighborBoost() {
   if(state.squirrel_evolution > 0) boost.addInPlace(squirrel_evolution_ethtree_boost);
   if(state.squirrel_upgrades[upgradesq_ethtree].count) boost.addInPlace(upgradesq_ethtree_boost.mulr(state.squirrel_upgrades[upgradesq_ethtree].count));
   if(state.squirrel_upgrades[upgradesq_ethtree2].count) boost.addInPlace(upgradesq_ethtree_boost2.mulr(state.squirrel_upgrades[upgradesq_ethtree2].count));
+  return boost;
+}
+
+function getEtherealTreeLotusNeighborBoost() {
+  var boost = new Num(0);
+  if(state.squirrel_upgrades[upgradesq_ethtree_lotus].count) boost.addInPlace(upgradesq_ethtree_lotus_boost.mulr(state.squirrel_upgrades[upgradesq_ethtree_lotus].count));
   return boost;
 }
 
@@ -4588,6 +4608,8 @@ Crop2.prototype.getBasicBoost = function(f, breakdown) {
     var num_mistle = 0;
     var num_tree = 0;
 
+    var tree_diag = state.squirrel_upgrades[upgradesq_ethtree_diag].count || state.squirrel_upgrades[upgradesq_ethtree_lotus].count;
+
     for(var dir = 0; dir < 8; dir++) { // get the neighbors N,E,S,W,NE,SE,SW,NW
       var x2 = f.x + ((dir == 1 || dir == 4 || dir == 5) ? 1 : ((dir == 3 || dir == 6 || dir == 7) ? -1 : 0));
       var y2 = f.y + ((dir == 0 || dir == 4 || dir == 7) ? -1 : ((dir == 2 || dir == 5 || dir == 6) ? 1 : 0));
@@ -4605,7 +4627,7 @@ Crop2.prototype.getBasicBoost = function(f, breakdown) {
           num_mistle++;
         }
       }
-      if((dir < 4 || state.squirrel_upgrades[upgradesq_ethtree_diag].count) && (n.index == FIELD_TREE_TOP || n.index == FIELD_TREE_BOTTOM)) {
+      if((dir < 4 || tree_diag) && (n.index == FIELD_TREE_TOP || n.index == FIELD_TREE_BOTTOM)) {
         num_tree++;
       }
     }
@@ -5755,6 +5777,11 @@ function() {
 '',
 undefined, undefined, tree_images[20][1][4]);
 
+var upgrade2_extra_fruit_slot8 = registerUpgrade2('extra fruit slot', LEVEL2, Res({resin:5e30, essence:200e6}), 2, function() {
+  state.fruit_slots++;
+  // NOTE: also update 'showStorageFruitSourceDialog' when adding new fruit slot upgrades
+}, function(){return true;}, 1, 'gain an extra storage slot for fruits', undefined, undefined, images_apple[8]);
+
 ///////////////////////////
 LEVEL2 = 27;
 upgrade2_register_id = 2200;
@@ -5789,6 +5816,21 @@ var upgrade2_field2_9x9 = registerUpgrade2('ethereal field 9x9', LEVEL2, Res({re
   changeField2Size(state, numw, numh);
   initField2UI();
 }, function(){return state.numw2 >= 9 && state.numh2 >= 8}, 1, 'increase ethereal field size to 9x9 tiles', undefined, undefined, field_ethereal[0]);
+
+///////////////////////////
+LEVEL2 = 30;
+upgrade2_register_id = 2500;
+
+// nothing here yet
+
+///////////////////////////
+LEVEL2 = 31;
+upgrade2_register_id = 2600;
+
+var upgrade2_extra_fruit_slot9 = registerUpgrade2('extra fruit slot', LEVEL2, Res({resin:1e36, essence:2e9}), 2, function() {
+  state.fruit_slots++;
+  // NOTE: also update 'showStorageFruitSourceDialog' when adding new fruit slot upgrades
+}, function(){return true;}, 1, 'gain an extra storage slot for fruits', undefined, undefined, images_apple[9]);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -8456,12 +8498,12 @@ var upgradesq_prestiged_mushroom = registerSquirrelUpgrade('prestiged mushroom b
     'Prestiged mushrooms get a ' + upgradesq_prestiged_mushroom_bonus.toPercentString() + ' boost',
     champignon[4]);
 
-var upgradesq_berry_multiplicity_boost_bonus = Num(0.1);
+var upgradesq_berry_multiplicity_boost_bonus = Num(0.2);
 var upgradesq_berry_multiplicity_boost = registerSquirrelUpgrade('berry multiplicity boost', undefined,
     'Boosts the berry multiplicity by an additional ' + upgradesq_berry_multiplicity_boost_bonus.toPercentString() + '. Requires berry multiplicity has been unlocked.',
     blackberry[4]);
 
-var upgradesq_mushroom_multiplicity_boost_bonus = Num(0.2);
+var upgradesq_mushroom_multiplicity_boost_bonus = Num(0.25);
 var upgradesq_mushroom_multiplicity_boost = registerSquirrelUpgrade('mushroom multiplicity boost', undefined,
     'Boosts the mushroom multiplicity by an additional ' + upgradesq_mushroom_multiplicity_boost_bonus.toPercentString() + '. Requires mushroom multiplicity has been unlocked.',
     champignon[4]);
@@ -8483,6 +8525,8 @@ var squirrel_evolution_ethtree_boost2 = Num(0); // not increased for the second 
 var squirrel_evolution_resin_boost2 = Num(0.25);
 
 var upgradesq_ethtree_diag = registerSquirrelUpgrade('diagonal ethereal tree', undefined, 'ethereal tree boost also works diagonally', tree_images[6][1][4]);
+var upgradesq_ethtree_lotus_boost = Num(0.2);
+var upgradesq_ethtree_lotus = registerSquirrelUpgrade('ethereal tree diagonal + lotus boost', undefined, 'ethereal tree also boosts lotuses (by ' + upgradesq_ethtree_lotus_boost.toPercentString() + '), and works diagonally as well ', tree_images[6][1][4]);
 
 // these also each add half of the upgradesq_doublefruitprob upgrade's double fruit chance, so doing these 2 is same as doing the 3 original fruit chance related upgrades
 var upgradesq_doublefruitprob_prob_half = 0.125;
@@ -8594,11 +8638,11 @@ registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_automaton3], undefine
 
 registerSquirrelStage(STAGE_REGISTER_EVOLUTION, undefined, [upgradesq_eth_all], undefined, true);
 
-registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_nuts, upgradesq_mushroom_multiplicity_boost], undefined, [upgradesq_diagonal_brassica, upgradesq_berry_multiplicity_boost]);
+registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_nuts, upgradesq_ethtree_lotus], undefined, [upgradesq_automaton3, upgradesq_squirrel3]);
 registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_prestiged_mushroom, upgradesq_prestiged_berry], undefined, [upgradesq_mushroom, upgradesq_berry], undefined, true);
-registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_automaton3, upgradesq_resin], undefined, [upgradesq_squirrel3, upgradesq_twigs], undefined, false);
-registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_nettle, upgradesq_stinging_multiplicity], undefined, [upgradesq_weather_duration, upgradesq_ethtree_diag], undefined, false);
-registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_essence, upgradesq_highest_level], undefined, [upgradesq_mushroom_efficiency, upgradesq_leveltime], undefined, false);
+registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_twigs, upgradesq_resin], undefined, [upgradesq_mushroom_multiplicity_boost, upgradesq_berry_multiplicity_boost], undefined, false);
+registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_diagonal_brassica, upgradesq_stinging_multiplicity], undefined, [upgradesq_mushroom_efficiency, upgradesq_nettle], undefined, false);
+registerSquirrelStage(STAGE_REGISTER_EVOLUTION, [upgradesq_essence, upgradesq_highest_level], undefined, [upgradesq_weather_duration, upgradesq_leveltime], undefined, false);
 
 registerSquirrelStage(STAGE_REGISTER_EVOLUTION, undefined, [upgradesq_bee2], undefined, true);
 
