@@ -9,6 +9,23 @@ export function atomic(file, value) {
 }
 export const writeJSON = (file, value) => atomic(file, JSON.stringify(value, null, 2) + '\n');
 export const readJSON = file => JSON.parse(readFileSync(file, 'utf8'));
+export const policyDigest = policy => createHash('sha256').update(JSON.stringify(policy)).digest('hex');
+export function validateStartingPolicy(policy, engine, reference) {
+  if (policy?.identity?.engine !== engine) throw new Error('Starting policy engine fingerprint does not match');
+  const p = policy.parameters;
+  if (!Array.isArray(p?.priorities) || p.priorities.length !== 4 ||
+      !p.priorities.every(v => Number.isFinite(v) && v >= -8 && v <= 8) ||
+      !Number.isFinite(p.unlockFraction) || p.unlockFraction < .05 || p.unlockFraction > 1 ||
+      !Number.isFinite(p.upgradeFraction) || p.upgradeFraction < .005 || p.upgradeFraction > 1 ||
+      !Array.isArray(p.layout) || p.layout.length !== 5 ||
+      !p.layout.every(row => Array.isArray(row) && row.length === 5)) throw new Error('Invalid starting policy parameters');
+  for (let y = 0; y < 5; y++) for (let x = 0; x < 5; x++) {
+    if ((reference.layout[y][x] === null) !== (p.layout[y][x] === null)) throw new Error('Starting policy changes tree cells');
+  }
+  if (JSON.stringify(p.layout.flat().sort()) !== JSON.stringify(reference.layout.flat().sort())) {
+    throw new Error('Starting policy changes crop-role counts');
+  }
+}
 export function trainerFingerprint() {
   const hash = createHash('sha256');
   for (const name of ['train-parallel.mjs', 'training-worker.mjs', 'parallel-training-common.mjs', 'learned-policy.mjs']) {

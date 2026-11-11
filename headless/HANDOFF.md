@@ -337,8 +337,10 @@ Next performance/search work, in suggested order:
 4. Measure the new parallel scheduler's sustained throughput and memory usage.
    It uses isolated processes and deterministic parent selection; see the
    parallel guide. More cores alone do not speed up the original one-worker loop.
-5. Add configurable search/train/test seeds, compute budgets, and cross-run warm
-   starts. Changing the hard-coded seed arrays now changes the trainer fingerprint.
+5. The parallel runner now supports search seeds, validation seeds and cross-run
+   policy warm starts; see the parallel guide. Configurable training seeds and
+   wall-clock compute budgets remain future work. The original `train.mjs`
+   still uses hard-coded seeds and has no cross-run warm starts.
 6. Expand the policy representation (placement, crop counts, timing), then consider
    neural reinforcement learning or imitation initialization if justified.
 

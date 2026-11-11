@@ -69,6 +69,48 @@ The old `train.mjs` and its output format remain unchanged. The earlier
 is not imported into this separate parallel run. Neither runner updates the
 viewer or scripted policy automatically.
 
+## Continue from a saved winner
+
+Use a new output directory and `--initial-policy` to import a `best-policy.json`:
+
+```sh
+node headless/train-parallel.mjs \
+  --out headless/training/continuation-2-w9-g8-c16-20261111 \
+  --initial-policy headless/training/local-parallel-w9-g8-c16-20261111/best-policy.json \
+  --workers 9 --generations 8 --children 16 --max-seconds 28800 \
+  --search-seed 20261112 --validation-seeds 201,202
+```
+
+This continuation starts from the previous winner `g7-c16`, re-evaluates its
+parameters on training seeds 1 and 2, then mutates from that incumbent. Previous
+scores, action histories, and search RNG state are not imported. The old run is
+untouched. The new search seed avoids repeating the previous mutation sequence.
+The incumbent survives any mutation that does not rank strictly better on the
+training seeds; validation performance can still decline.
+
+Final validation compares the **imported starting policy** and the new winner
+on the same seeds 201 and 202. They are fresh relative to the previous run's
+evaluation seeds 101 and 102 and are never used for parent selection. In this
+run `validationBaselineMeanSeconds` means the imported winner's mean, and
+`validationImprovementPercent` measures additional improvement over that winner,
+not improvement over the original scripted policy. `startingPolicyId`,
+`trainingBaselineMeanSeconds`, and `trainingImprovementPercent` record the
+corresponding training comparison. Improvement is null if either policy fails.
+
+The full starting artifact, original path, and serialized JSON SHA-256 are embedded
+in `status.json`. The engine fingerprint, numeric bounds, tree positions and crop
+counts must match the current policy representation. An older trainer fingerprint
+is allowed because only policy parameters are imported and scores are recomputed.
+The embedded copy makes resume independent of the external source file: omit
+`--initial-policy` when resuming if the file was moved. If supplied, it must match
+the original digest. Keep all other flags the same (except worker count).
+
+`--search-seed` is an unsigned 32-bit integer. `--validation-seeds` is a comma-
+separated list of 1–100 unique unsigned 32-bit seeds, disjoint from training seeds
+1 and 2. Defaults remain 20261111 and 101,102 for runs without these flags.
+Changing source code still invalidates resumability of older runs; completed
+run directories remain readable and their policy exports can seed a new run.
+
 ## Determinism and checks
 
 Candidates for a generation are all sampled from its starting incumbent before
@@ -84,7 +126,9 @@ node --test --test-concurrency=1 headless/train-parallel.test.mjs
 The integration tests compare serial, parallel, and legacy trainer search state,
 episode results and exact replay histories on short trajectories. They also cover
 duplicate writers, configuration rejection without state modification, graceful
-stop/resume, and a killed worker followed by recovery. Deliberately short test
+stop/resume, a killed worker followed by recovery, imported policy retention,
+mutations around the imported parent, fresh validation seeds, malformed policy
+rejection, and warm-start resume without the source file. Deliberately short test
 episodes time out; they do not demonstrate learned improvements or exhaustive
 game equivalence. Original-browser equivalence remains a separate limitation.
 

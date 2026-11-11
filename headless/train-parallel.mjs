@@ -4,22 +4,28 @@ import { resolve } from 'node:path';
 import { fork, execFileSync } from 'node:child_process';
 import { HeadlessEnvironment } from './environment.mjs';
 import { initialParameters } from './learned-policy.mjs';
-import { clone, readJSON, writeJSON, mutate, trainerFingerprint } from './parallel-training-common.mjs';
+import { clone, readJSON, writeJSON, mutate, trainerFingerprint, policyDigest, validateStartingPolicy } from './parallel-training-common.mjs';
 
 const opts = {}, args = process.argv.slice(2);
 for (let i = 0; i < args.length; i += 2) {
-  if (!['--out', '--workers', '--generations', '--children', '--max-seconds'].includes(args[i]) ||
-      !args[i + 1] || opts[args[i]]) throw new Error('Usage: node headless/train-parallel.mjs --out DIRECTORY [--workers 9 --generations 8 --children 16 --max-seconds 28800]');
+  if (!['--out', '--workers', '--generations', '--children', '--max-seconds', '--initial-policy', '--search-seed', '--validation-seeds'].includes(args[i]) ||
+      !args[i + 1] || opts[args[i]]) throw new Error('Usage: node headless/train-parallel.mjs --out DIRECTORY [--workers 9 --generations 8 --children 16 --max-seconds 28800 --initial-policy FILE --search-seed UINT32 --validation-seeds 201,202]');
   opts[args[i]] = args[i + 1];
 }
 if (!opts['--out']) throw new Error('--out is required');
 const workers = Number(opts['--workers'] || 9);
 const config = { generations: Number(opts['--generations'] || 8), children: Number(opts['--children'] || 16),
-  maxSeconds: Number(opts['--max-seconds'] || 28800), trainingSeeds: [1, 2], validationSeeds: [101, 102], searchSeed: 20261111 };
+  maxSeconds: Number(opts['--max-seconds'] || 28800), trainingSeeds: [1, 2],
+  validationSeeds: opts['--validation-seeds'] ? opts['--validation-seeds'].split(',').map(v => /^\d+$/.test(v) ? Number(v) : NaN) : [101, 102],
+  searchSeed: Number(opts['--search-seed'] ?? 20261111) };
+const uint32 = value => Number.isInteger(value) && value >= 0 && value <= 0xffffffff;
 if (!Number.isInteger(workers) || workers < 1 || workers > 64 ||
     !Number.isInteger(config.generations) || config.generations < 1 || config.generations > 100 ||
     !Number.isInteger(config.children) || config.children < 1 || config.children > 100 ||
-    !Number.isFinite(config.maxSeconds) || config.maxSeconds < .333 || config.maxSeconds > 604800) throw new Error('Invalid training bounds');
+    !Number.isFinite(config.maxSeconds) || config.maxSeconds < .333 || config.maxSeconds > 604800 ||
+    !uint32(config.searchSeed) || config.validationSeeds.length < 1 || config.validationSeeds.length > 100 ||
+    !config.validationSeeds.every(seed => uint32(seed) && !config.trainingSeeds.includes(seed)) ||
+    new Set(config.validationSeeds).size !== config.validationSeeds.length) throw new Error('Invalid training bounds or seeds');
 
 const directory = resolve(opts['--out']);
 mkdirSync(directory, { recursive: true });
@@ -47,8 +53,22 @@ function save() {
 try {
   const env = new HeadlessEnvironment({ seed: 1, maxEpisodeSeconds: config.maxSeconds });
   const identity = { engine: env.metadata.engineFingerprint, trainer: trainerFingerprint() };
-  if (existsSync(file('status.json'))) {
-    const saved = readJSON(file('status.json'));
+  const saved = existsSync(file('status.json')) ? readJSON(file('status.json')) : null;
+  let startingPolicy;
+  if (opts['--initial-policy']) {
+    const sourcePath = resolve(opts['--initial-policy']);
+    const artifact = readJSON(sourcePath);
+    startingPolicy = { sourcePath, sha256: policyDigest(artifact), artifact };
+  } else if (saved?.startingPolicy) {
+    // Resume from the embedded copy even if the original export was moved.
+    startingPolicy = saved.startingPolicy;
+  }
+  if (startingPolicy) {
+    validateStartingPolicy(startingPolicy.artifact, identity.engine, initialParameters);
+    if (policyDigest(startingPolicy.artifact) !== startingPolicy.sha256) throw new Error('Starting policy digest mismatch');
+    config.initialPolicySha256 = startingPolicy.sha256;
+  }
+  if (saved) {
     if (saved.format !== 'etherealfarm-parallel-training-v1' || JSON.stringify(saved.config) !== JSON.stringify(config) ||
         JSON.stringify(saved.identity) !== JSON.stringify(identity)) throw new Error('Configuration or source changed; use a new output directory');
     // After an unclean coordinator exit, disconnected workers may still be
@@ -63,7 +83,7 @@ try {
     state = { format: 'etherealfarm-parallel-training-v1', config, identity, node: process.version,
       commit: execFileSync('git', ['rev-parse', 'HEAD'], { cwd: new URL('..', import.meta.url), encoding: 'utf8' }).trim(),
       startedAt: new Date().toISOString(), status: 'starting', rng: config.searchSeed,
-      generation: 0, completed: [], pending: [], validation: [], best: null };
+      generation: 0, completed: [], pending: [], validation: [], best: null, startingPolicy };
   }
   state.active = {};
   delete state.error;
@@ -141,7 +161,7 @@ try {
   if (state.status !== 'complete') {
     state.status = 'training'; save();
     if (!state.best) {
-      state.initial ??= { id: 'initial', parameters: clone(initialParameters) };
+      state.initial ??= { id: 'initial', parameters: clone(state.startingPolicy?.artifact.parameters ?? initialParameters) };
       save();
       if (await evaluate([state.initial], config.trainingSeeds)) {
         state.best = clone(state.initial); state.completed.push(clone(state.initial)); save();
@@ -169,7 +189,7 @@ try {
     if (!stopping) {
       state.status = 'validating';
       if (!state.validation.length) state.validation = [
-        { id: 'validation-initial', parameters: clone(initialParameters) },
+        { id: 'validation-initial', parameters: clone(state.initial.parameters) },
         { id: 'validation-best', parameters: clone(state.best.parameters) },
       ];
       save();
@@ -185,6 +205,12 @@ try {
         validationWinnerMeanSeconds: winner.successes === config.validationSeeds.length ? winner.loss : null,
         validationImprovementPercent: baseline.successes === config.validationSeeds.length && winner.successes === config.validationSeeds.length
           ? 100 * (baseline.loss - winner.loss) / baseline.loss : null };
+      if (state.startingPolicy) {
+        state.result.startingPolicyId = state.startingPolicy.artifact.id;
+        state.result.trainingBaselineMeanSeconds = state.initial.successes === config.trainingSeeds.length ? state.initial.loss : null;
+        state.result.trainingImprovementPercent = state.initial.successes === config.trainingSeeds.length && state.best.successes === config.trainingSeeds.length
+          ? 100 * (state.initial.loss - state.best.loss) / state.initial.loss : null;
+      }
     }
     save();
   }
