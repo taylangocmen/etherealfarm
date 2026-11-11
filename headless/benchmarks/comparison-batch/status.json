@@ -1,0 +1,48 @@
+{
+  "format": "etherealfarm-experiments-v1",
+  "pid": 30217,
+  "reference": "/Users/taylangocmen/code/etherealfarm/headless/benchmarks/baseline",
+  "repeats": 2,
+  "startedAt": "2026-11-11T16:09:21.937Z",
+  "status": "complete",
+  "runs": [
+    {
+      "directory": "/Users/taylangocmen/code/etherealfarm/headless/benchmarks/comparison-batch/run-1",
+      "results": [
+        {
+          "seed": 1,
+          "completed": true,
+          "gameSeconds": 23145.831,
+          "simulationMs": 307468.85874999996,
+          "ticksPerSecond": 226.06191821369293,
+          "speedup": 2.2344853481035667,
+          "traceSha256": "48d00565c3ab9c13a412073d133a36c2046f43c9ea1d267a902e08c4a60ddcdc",
+          "matches": true
+        }
+      ]
+    },
+    {
+      "directory": "/Users/taylangocmen/code/etherealfarm/headless/benchmarks/comparison-batch/run-2",
+      "results": [
+        {
+          "seed": 1,
+          "completed": true,
+          "gameSeconds": 23145.831,
+          "simulationMs": 313212.03525,
+          "ticksPerSecond": 221.91675982221054,
+          "speedup": 2.193512964234027,
+          "traceSha256": "48d00565c3ab9c13a412073d133a36c2046f43c9ea1d267a902e08c4a60ddcdc",
+          "matches": true
+        }
+      ]
+    }
+  ],
+  "seeds": [
+    1
+  ],
+  "maxEpisodeSeconds": 86399.847,
+  "currentRun": 2,
+  "currentDirectory": "/Users/taylangocmen/code/etherealfarm/headless/benchmarks/comparison-batch/run-2",
+  "medianSpeedup": 2.213999156168797,
+  "finishedAt": "2026-11-11T16:26:28.918Z"
+}

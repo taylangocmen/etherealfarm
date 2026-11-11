@@ -1,0 +1,122 @@
+{
+  "format": "etherealfarm-benchmark-v1",
+  "commit": "0716831844df15ab852150aec695953b5fc6cc83",
+  "dirty": false,
+  "policySha256": "69bb9b3ec1271490443c8d6c1eb740397e81112462472c02e51023d385b6f949",
+  "runnerSha256": "8f1690668ecc7e806eb01668a44d2993ca5f6eb4551d9ac5dbe01d8f2f498999",
+  "node": "v24.14.1",
+  "platform": "darwin",
+  "arch": "arm64",
+  "cpu": "Apple M2 Pro",
+  "workers": 1,
+  "startedAt": "2026-11-11T16:04:37.800Z",
+  "seed": 1,
+  "metadata": {
+    "task": "fastest-first-transcension",
+    "engineFingerprint": "a610c21dbbb62934e328ee28558894c0af83a8a179dd5cbd28af9bba33123771",
+    "tickSeconds": 0.333,
+    "maxEpisodeSeconds": 86399.847,
+    "holiday": false,
+    "initialSeason": "spring",
+    "decisionCadence": "at most one action per tick"
+  },
+  "completed": true,
+  "truncated": false,
+  "gameSeconds": 23145.831,
+  "ticks": 69507,
+  "completionLevel": 10,
+  "awardedResin": {
+    "b": 1.4364238899358144,
+    "e": 3
+  },
+  "traceSha256": "48d00565c3ab9c13a412073d133a36c2046f43c9ea1d267a902e08c4a60ddcdc",
+  "finalObservationSha256": "b537e659207af5bed0b5453dc32cc434c5f1d5bac0d3aa79cd4456b83129832b",
+  "historySha256": "7249b1c348e706257b3cdf25b410a0151c058bfca7d2e8e82c6cf63e89411b4c",
+  "timing": {
+    "initializationMs": 766.491292,
+    "simulationMs": 687034.659875,
+    "policyMs": 1670.5813160005496,
+    "stepMs": 681948.3320979972,
+    "recordingMs": 3395.347658999247,
+    "ticksPerSecond": 101.16956837759277,
+    "gameSecondsPerWallSecond": 33.68946626973839
+  },
+  "milestones": [
+    {
+      "tick": 18400,
+      "gameSeconds": 6127.2,
+      "treeLevel": 1,
+      "completed": false
+    },
+    {
+      "tick": 19550,
+      "gameSeconds": 6510.15,
+      "treeLevel": 2,
+      "completed": false
+    },
+    {
+      "tick": 20804,
+      "gameSeconds": 6927.732,
+      "treeLevel": 3,
+      "completed": false
+    },
+    {
+      "tick": 22023,
+      "gameSeconds": 7333.659,
+      "treeLevel": 4,
+      "completed": false
+    },
+    {
+      "tick": 24707,
+      "gameSeconds": 8227.431,
+      "treeLevel": 5,
+      "completed": false
+    },
+    {
+      "tick": 29643,
+      "gameSeconds": 9871.119,
+      "treeLevel": 6,
+      "completed": false
+    },
+    {
+      "tick": 34030,
+      "gameSeconds": 11331.99,
+      "treeLevel": 7,
+      "completed": false
+    },
+    {
+      "tick": 38012,
+      "gameSeconds": 12657.996,
+      "treeLevel": 8,
+      "completed": false
+    },
+    {
+      "tick": 45231,
+      "gameSeconds": 15061.923,
+      "treeLevel": 9,
+      "completed": false
+    },
+    {
+      "tick": 69506,
+      "gameSeconds": 23145.498,
+      "treeLevel": 10,
+      "completed": false
+    },
+    {
+      "tick": 69507,
+      "gameSeconds": 23145.831,
+      "treeLevel": 0,
+      "completed": true
+    }
+  ],
+  "actionCounts": {
+    "inspect": 4,
+    "plant": 148,
+    "wait": 68893,
+    "fern": 192,
+    "upgrade": 211,
+    "replace": 43,
+    "weather": 15,
+    "transcend": 1
+  }
+}

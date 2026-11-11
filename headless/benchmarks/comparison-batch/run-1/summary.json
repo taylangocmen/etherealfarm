@@ -1,0 +1,20 @@
+{
+  "format": "etherealfarm-benchmark-summary-v1",
+  "commit": "34d98ba86e898cfdd1d6038137a4637fff0c006d",
+  "dirty": true,
+  "policySha256": "69bb9b3ec1271490443c8d6c1eb740397e81112462472c02e51023d385b6f949",
+  "runnerSha256": "8f1690668ecc7e806eb01668a44d2993ca5f6eb4551d9ac5dbe01d8f2f498999",
+  "node": "v24.14.1",
+  "platform": "darwin",
+  "arch": "arm64",
+  "cpu": "Apple M2 Pro",
+  "workers": 1,
+  "startedAt": "2026-11-11T16:16:06.481Z",
+  "seeds": [
+    1
+  ],
+  "completed": 1,
+  "truncated": 0,
+  "medianSuccessfulGameSeconds": 23145.831,
+  "comparisonsPassed": true
+}
