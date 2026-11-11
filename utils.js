@@ -658,7 +658,7 @@ var Utils = (function() {
   // returns time since epoch in seconds in UTC (as floating point)
   var getTime = function() {
     //return (new Date()).getTime() / 1000.0;
-    return Date.now() / 1000.0;
+    return gameRuntime.now();
   };
   result.getTime = getTime;
 

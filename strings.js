@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-var localstorageName = window['localstorageNameHTML'] ? window['localstorageNameHTML'] : 'local';
+var localstorageName = typeof window !== 'undefined' && window['localstorageNameHTML'] ? window['localstorageNameHTML'] : 'local';
 var localstorageName_recover = localstorageName + '_recover'; // backup of a corrupt save that failed to load
 var localstorageName_success = localstorageName + '_success'; // backup of a last known good loaded save (from local storage; if import save is used, it's assumed the user has that save in a text file)
 var localstorageName_prev_version = localstorageName + '_prev_version'; // backup of last save saved by a previous game version

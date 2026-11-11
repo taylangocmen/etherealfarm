@@ -30,27 +30,7 @@ var spans = [];
 
 var futuremessages = [];
 
-// color types for log message
-var C_DEFAULT = 0; // anything that doesn't need to stand out, includes almost any immediate response to user action such as performing an upgrade (as opposed to having an upgrade unlocked due to other events)
-var C_ERROR = 1; // program error
-var C_INVALID = 2; // usage errors such as not enough resources
-var C_UNIMPORTANT = 3;
-var C_RANDOM = 4;
-var C_META = 5;
-var C_HELP = 6;
-var C_NATURE = 7; // basic field, ferns, fruits, ...
-var C_ETHEREAL = 8;
-var C_UNLOCK = 9; // achievements, unlocked upgrades, ...
-var C_UNDO = 10;
-var C_AUTOMATON = 11;
-var C_AMBER = 12;
-var C_PRESENT = 13;
-var C_EGG = 14;
-var C_GOAL = 15;
-var C_IMPORTANT = 16;
-var C_TD = 17; // tower defense related
-var C_INFINITY = 18; // infinity field related
-
+// Message categories are shared in gameplay_helpers.js.
 
 // this system exists to make it possible to have messages to be distinguishable from each other but also have color according to some theme,
 // without having to carefully craft exact color values manually for each, hence the pseudorandom

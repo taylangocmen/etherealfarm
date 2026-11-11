@@ -11720,6 +11720,7 @@ function holidayPresentIndex() {
 // it's in theory possible to use bit masks to filter the return value, e.g. (holidayEventActive() & 3) for presents or eggs, but the return value will always contain exactly 1 holiday (1 bit set)
 // NOTE: slow function due to usage of 'new Date', use 'state.holiday' to access this value whenever possible
 function holidayEventActive() {
+  if(gameRuntime.holiday !== null) return gameRuntime.holiday;
   var date = new Date();
   //date = new Date(date.getSeconds() * 2000000000); // debug season transitions by having time go really fast
   var month = date.getMonth() + 1;

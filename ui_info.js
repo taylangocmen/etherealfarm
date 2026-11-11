@@ -23,7 +23,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 // resource gain per second, mainly used for display purposes, also used as temporary variable inside update() but shouldn't be relied on for any non-display purpose outside of that
 // also used for displaying estimated time remaining of upgrade, ...
 // can also get updated, through updateResourceUI, while the game is paused
-var gain = Res();
+// gain is declared in gameplay_helpers.js.
 
 var gain_pos = Res();
 var gain_neg = Res();

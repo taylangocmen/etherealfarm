@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewer-token" content="__TOKEN__">
+<title>Ethereal Farm · local observer</title>
+<link rel="stylesheet" href="/style.css"><script type="module" src="/viewer.js"></script>
+</head>
+<body>
+<header><p class="eyebrow">ETHEREAL FARM / LOCAL OBSERVER</p><h1>A small farm. A first transcension.</h1>
+<p>A scripted player tending a fresh field. Every move uses the original game rules.</p></header>
+<main>
+<section class="controls" aria-label="Playback controls">
+<label>Seed <input id="seed" type="number" min="0" max="4294967295" value="1" step="1"></label>
+<button id="reset">New farm</button><button id="play" disabled>Play</button>
+<button id="step" disabled>Single-step</button>
+<label>Speed <select id="speed"><option value="1">1×</option><option value="10" selected>10×</option><option value="100">100×</option><option value="1000">1000×</option></select></label>
+</section>
+<p id="status" role="status">Create a farm to begin. Nothing advances until you press Play or Single-step.</p>
+<section class="metrics" aria-label="Farm statistics">
+<div><span>Game time</span><strong id="time">—</strong></div><div><span>Tree level / goal</span><strong id="level">— / 10</strong></div>
+<div><span>Seeds</span><strong id="seeds">—</strong></div><div><span>Spores / next level</span><strong id="spores">—</strong></div>
+<div><span>Pending resin</span><strong id="resin">—</strong></div><div><span>Season</span><strong id="season">—</strong></div>
+</section>
+<div class="columns"><section><h2>The field</h2><div id="field" aria-label="Farm grid"></div>
+<p class="muted">Growth bars show maturity; watercress bars show remaining lifetime. Ferns appear as 🍃.</p>
+<p id="weather"></p><p id="fruit"></p></section>
+<section><h2>Player activity</h2><p id="last">Waiting for a farm.</p><ol id="activity" reversed></ol></section></div>
+<footer>Baseline script · one decision per 333 ms game tick · no learning algorithm yet.<br>
+Speed is a target, limited by your machine. Pause waits for the current batch (at most 100 ticks). Closing this page stops requests.</footer>
+</main>
+</body></html>

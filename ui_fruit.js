@@ -21,77 +21,7 @@ var fruitScrollFlex = undefined;
 var busyChoosingTargetSlot = undefined; // for "move to slot" button
 var busyChoosingTargetSlot_shift = false;
 
-function getFruitAbilityName(ability, opt_abbreviation) {
-  if(opt_abbreviation) {
-    switch(ability) {
-      case FRUIT_NONE: return '/';
-      case FRUIT_BERRYBOOST: return 'BB';
-      case FRUIT_MUSHBOOST: return 'MB';
-      case FRUIT_MUSHEFF: return 'ME';
-      case FRUIT_FLOWERBOOST: return 'FB';
-      case FRUIT_GROWSPEED: return 'G';
-      case FRUIT_WEATHER: return 'WB';
-      case FRUIT_BRASSICA: return 'BC';
-      case FRUIT_NETTLEBOOST: return 'NB';
-      // S from "season", the actual season is known due to the fruit's name which includes the season in it
-      case FRUIT_SPRING: return getSeason() == 0 ? 'S' : 's';
-      case FRUIT_SUMMER: return getSeason() == 1 ? 'S' : 's';
-      case FRUIT_AUTUMN: return getSeason() == 2 ? 'S' : 's';
-      case FRUIT_WINTER: return getSeason() == 3 ? 'S' : 's';
-      case FRUIT_SPRING_SUMMER: return ((getSeason() == 0 || getSeason() == 1) && haveFruitMix(1)) ? 'S' : 's';
-      case FRUIT_SUMMER_AUTUMN: return ((getSeason() == 1 || getSeason() == 2) && haveFruitMix(1)) ? 'S' : 's';
-      case FRUIT_AUTUMN_WINTER: return ((getSeason() == 2 || getSeason() == 3) && haveFruitMix(1)) ? 'S' : 's';
-      case FRUIT_WINTER_SPRING: return ((getSeason() == 3 || getSeason() == 0) && haveFruitMix(1)) ? 'S' : 's';
-      case FRUIT_ALL_SEASON: return haveFruitMix(2) ? 'S' : 's';
-      case FRUIT_ALL_SEASON2: return haveFruitMix(3) ? 'S' : 's';
-      case FRUIT_INFERNAL: return 'I';
-      case FRUIT_RESINBOOST: return 'RS';
-      case FRUIT_TWIGSBOOST: return 'TW';
-      case FRUIT_RESIN_TWIGS: return 'RT';
-      case FRUIT_NUTBOOST: return 'NU';
-      case FRUIT_BEEBOOST: return 'BE';
-      case FRUIT_MIX: return 'X';
-      case FRUIT_TREELEVEL: return 'T';
-      case FRUIT_SEED_OVERLOAD: return 'O';
-      case FRUIT_SPORES_OVERLOAD: return 'MO'; // mo = mushroom overload
-      case FRUIT_GROW_ENHANCE: return 'E';
-    }
-    return '?';
-  }
-  switch(ability) {
-    case FRUIT_NONE: return 'none';
-    case FRUIT_BERRYBOOST: return 'berry boost';
-    case FRUIT_MUSHBOOST: return 'mushroom boost';
-    case FRUIT_MUSHEFF: return 'mushroom economy';
-    case FRUIT_FLOWERBOOST: return 'flower boost';
-    case FRUIT_GROWSPEED: return 'growing speed';
-    case FRUIT_WEATHER: return 'weather boost';
-    case FRUIT_BRASSICA: return 'brassica copying';
-    case FRUIT_NETTLEBOOST: return 'nettle boost';
-    case FRUIT_SPRING: return 'spring boost';
-    case FRUIT_SUMMER: return 'summer boost';
-    case FRUIT_AUTUMN: return 'autumn boost';
-    case FRUIT_WINTER: return 'winter boost';
-    case FRUIT_SPRING_SUMMER: return 'spring and summer boost';
-    case FRUIT_SUMMER_AUTUMN: return 'summer and autumn boost';
-    case FRUIT_AUTUMN_WINTER: return 'autumn and winter boost';
-    case FRUIT_WINTER_SPRING: return 'winter and spring boost';
-    case FRUIT_ALL_SEASON: return '4-seasons boost';
-    case FRUIT_ALL_SEASON2: return 'ultra seasons boost';
-    case FRUIT_INFERNAL: return 'infernal boost (challenge only)';
-    case FRUIT_RESINBOOST: return 'resin boost';
-    case FRUIT_TWIGSBOOST: return 'twigs boost';
-    case FRUIT_RESIN_TWIGS: return 'resin and twigs boost';
-    case FRUIT_NUTBOOST: return 'nuts boost';
-    case FRUIT_BEEBOOST: return 'bee boost';
-    case FRUIT_MIX: return 'mix nettle/brass/bee';
-    case FRUIT_TREELEVEL: return 'treelevel prod boost';
-    case FRUIT_SEED_OVERLOAD: return 'seeds overload';
-    case FRUIT_SPORES_OVERLOAD: return 'spores overload';
-    case FRUIT_GROW_ENHANCE: return 'grow and enhance';
-  }
-  return 'unknown';
-}
+
 
 function getFruitAbilityDescription(ability) {
   switch(ability) {
@@ -1250,11 +1180,7 @@ function setupFruitDrag(flex, slot, f) {
 }
 
 // this is also the max width of the fruit UI itself. Max 10 or 11 fits reasonably, 12 may be a bit too much
-var MAXFRUITARROWS = 10;
-
-function getNumFruitArrows() {
-  return Math.min(MAXFRUITARROWS, state.fruit_slots);
-}
+// MAXFRUITARROWS and getNumFruitArrows are shared with gameplay_helpers.js.
 
 // how many columns of fruits are shown
 function getNumFruitsWidth() {
@@ -1519,45 +1445,6 @@ function getFruitCategory(f) {
   if(getFruitAbilityFor(f, FRUIT_BRASSICA) > 0) return 1;
   return 0; // only production skills
 }
-
-// returns whether the fruit is probably interesting enough for the player to be dropped into the stored fruits rather than the cacrificial pool
-// return value meanings:
-// 0: not interesting
-// 1: somewhat interesting
-// 2: very interesting
-// these heuristics are not flawless and a player should take a look at the fruit tab before transcending anyway, when looking for a particular fruit to fuse, ...
-// NOTE: this function comes with some risk of player expecting high tier fruits to always be dropped in main stored slot or always highlight tab for new high tier fruits, so should not overdo it, only make tab red if the high tier fruits clearly are novel
-function isFruitInteresting(fruit) {
-  var best = -1;
-  for(var i = 0; i < state.fruit_stored.length; i++) {
-    var f = state.fruit_stored[i];
-    if(!f) continue;
-    best = Math.max(best, f.tier);
-  }
-
-  if(fruit.tier > best) return 2; // if the new fruit has a higher tier than any fruit you have, it's definitely interesting
-  if(fruit.tier < best) return 0; // if lower than best tier you have, it's definitely not interesting
-
-
-  var numbest = 0;
-  var numbest2 = 0;
-  var newseason = (fruit.type > 0);
-  for(var i = 0; i < state.fruit_stored.length; i++) {
-    var f = state.fruit_stored[i];
-    if(fruit.type != 11 && f.type == 11) continue; // skip mandrakes for this count, if you have e.g. 5 ruby fruits and 12 emerald mandrakes, the emerald mandrakes should _not_ make it consider the ruby fruits to be interesting because mandrakes are a separately collected type of fruit
-    if(!f) continue;
-    if(f.tier == best) numbest++;
-    else if(f.tier + 1 == best) numbest2++;
-    if(newseason && f.tier == best && fruitContainsSeasonalType(f, fruit.type)) newseason = false;
-  }
-  if(newseason) return 2; // a new season is very interesting
-
-  if(numbest < numbest2) return 1;
-  //if(getActiveFruit() && getActiveFruit().tier + 1 == fruit.tier) return 1; // if the player is using a fruit with tier - 1, then likely that one still has better abilities and the player is trying to collect next tier fruits, so consider it interesting. This is interesting, but not interesting enough to warrant returning 2, because this heuristic depends on carried fruit
-
-  return 0;
-}
-
 
 // the "achievement unlocked" chip at the bottom
 var fruitChipFlex = undefined;

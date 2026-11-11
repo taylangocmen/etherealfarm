@@ -1616,10 +1616,10 @@ function createInitialState() {
   state.lastFernTime = state.g_starttime;
 
   computeDerived(state);
-  state.seed0 = Math.floor(Math.random() * 281474976710656);
-  state.fruit_seed = Math.floor(Math.random() * 281474976710656);
-  state.fern_seed = Math.floor(Math.random() * 281474976710656);
-  state.present_seed = Math.floor(Math.random() * 281474976710656);
+  state.seed0 = Math.floor(gameRuntime.random() * 281474976710656);
+  state.fruit_seed = Math.floor(gameRuntime.random() * 281474976710656);
+  state.fern_seed = Math.floor(gameRuntime.random() * 281474976710656);
+  state.present_seed = Math.floor(gameRuntime.random() * 281474976710656);
 
   state.initSquirrelStages();
   state.initEvolutionAndHatImages();

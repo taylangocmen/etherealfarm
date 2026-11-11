@@ -1,0 +1,229 @@
+# Local first-transcension environment
+
+This is the initial headless extraction for **fastest first transcension from a
+fresh save**. It uses the fork's original crop formulas, adjacency allocation,
+growth, unlocks, achievements, fruit generation, weather, and transcend action.
+There is no LLM, browser, server, network connection, package installation, or
+training algorithm involved. Use a local Node.js runtime with ES modules and
+the built-in `node:vm`/`node:test` modules (Node.js 20 or newer).
+
+**Validation status:** all seven focused tests passed locally on 2026-11-11
+(one worker, approximately 13 seconds). The seed-1 scripted player subsequently
+completed a legal first transcension through the local viewer: displayed game
+time **6h 25m 45s**, level **10**, awarded resin **11.49** (rounded display values).
+Equivalence with original browser gameplay still needs validation before treating
+this as a trustworthy training benchmark. No optimal-play claim has been established.
+
+## JavaScript API
+
+From the repository root, create a script such as:
+
+```js
+import { HeadlessEnvironment } from './headless/environment.mjs';
+
+const env = new HeadlessEnvironment({ seed: 42 });
+const initial = env.observe();
+const plant = env.legalActions().find(action => action.type === 'plant');
+const result = env.step(plant);
+
+console.log(result.observation.elapsedSeconds); // 0.333
+console.log(result.terminated);                 // false
+
+const checkpoint = env.snapshot();
+env.step({ type: 'wait' }, { ticks: 100 });       // 33.3 game seconds, no real-time sleep
+env.restore(checkpoint);
+```
+
+Available methods:
+
+| Method | Meaning |
+| --- | --- |
+| `reset({seed})` | Recreates the isolated engine and a fresh save; returns an observation |
+| `observe()` | Returns a detached JSON observation without advancing time |
+| `legalActions()` | Enumerates currently legal actions in the supported first-run action space |
+| `step(action, {ticks: 1})` | Applies one action, then simulates that many fixed ticks |
+| `snapshot()` | Returns a portable replay checkpoint; does not write a file |
+| `restore(checkpoint)` | Reconstructs the run by deterministic replay |
+| `metadata` | Reports benchmark settings and a SHA-256 engine fingerprint |
+
+Seeds are unsigned 32-bit integers. An episode defaults to at most seven game
+days; `maxEpisodeSeconds` may reduce that limit, rounded down to whole ticks.
+One `step` accepts 1–10,811 ticks (at most about one game hour). Calls are
+synchronous and run on one CPU worker. No process or timer is started in the
+background. CPU use is bounded by the requested ticks, not by a wall-time SLA.
+
+## Benchmark contract
+
+- Fresh 5×5 field and the game's actual starter resources, with no inherited
+  resin, upgrades, fruit, or achievements.
+- Normal spring start. Seasons advance normally; calendar holiday bonuses are
+  disabled so the benchmark does not change with the host date.
+- Fixed **333 ms** simulation steps, matching the browser's nominal update
+  interval. Large waits execute every step; they do not use offline catch-up.
+- At most one structured action per tick, at the beginning of the interval.
+  Bulk UI shortcuts are represented by successive decisions. This is a declared
+  action-cadence constraint, not a claim of unrestricted human speedrun parity.
+- Success requires actually completing the first normal transcension at tree
+  level 10 or above. Reaching 10 alone does not terminate the episode.
+- The score is total simulated seconds through the successful update, with
+  333 ms resolution. Reward is negative elapsed seconds. `simulationTicks` is
+  an integration counter, not the game's variable-duration update counter.
+- `terminated` means successful transcension; `truncated` means the time limit
+  was reached without success. A learning algorithm must distinguish these;
+  an unfinished short rollout is not a faster successful run.
+- Advancement stops after the successful transcend update; no second run can
+  be played through this API. `completionLevel` and `awardedResin` remain in the
+  terminal observation even though the basic tree has reset to zero.
+
+Supported actions are `wait`, `plant`, `replace`, `delete`, `upgrade` (including
+both choice branches), `fern`, `weather`, `fruit-select`, `fruit-move`, `inspect`,
+and `transcend`. Copy complete action objects from `legalActions()`; IDs come
+from the current engine rather than a separate hard-coded crop catalog.
+
+`inspect` models reading help, changelog, player stats, and (once available)
+fruit-storage information. The original game awards small production bonuses
+for those interactions. The adapter exposes them as explicit actions and lets
+the original medal conditions award them; it does not pre-grant achievements.
+
+The scope excludes challenges, later fields, automation, amber purchases,
+save manipulation, and post-transcension progression. Fruit fusion and essence
+spending are not exposed in this first action surface: with holidays disabled,
+the fresh run has only the level-5 fruit before reaching the target level, and
+no essence from prior sacrifices. Extending beyond the immediate first-reset
+objective requires expanding the action surface and its legality checks.
+
+Observations include the field, resources, crop costs and growth times, unlocked
+upgrades, weather/cooldowns, fern position, fruit inventory, earned achievements,
+and legal actions. Large quantities use `{b, e}` for **b × 2^e**, preserving the
+game's `Num` representation. They must not be blindly converted to ordinary
+floating-point numbers in a future long-horizon learner. Observations omit
+hidden RNG seeds and future random outcomes.
+
+Invalid public actions throw before advancing time or changing the game. An
+unexpected engine error faults the instance; use `reset()` before continuing.
+Engine messages are returned as events (up to 1,000 per step, with an explicit
+drop count). UI dialogs and sound are not rendered.
+
+## JSON-lines transport
+
+The CLI allows another local program, including Python, to control the same
+environment over stdin/stdout without an HTTP server:
+
+```sh
+node headless/cli.mjs
+```
+
+Send one JSON object per line:
+
+```json
+{"id":1,"command":"reset","seed":42}
+{"id":2,"command":"legalActions"}
+{"id":3,"command":"step","action":{"type":"wait"},"ticks":100}
+{"id":4,"command":"observe"}
+{"id":5,"command":"snapshot"}
+```
+
+For restore, send `{"command":"restore","snapshot":...}` with the returned
+checkpoint object. Responses have `id`, `ok`, and either `result` or `error`.
+The CLI does not choose actions, start training, or save checkpoints for you.
+
+## Extraction boundaries
+
+- `game_runtime.js`: default browser clock/randomness/scheduling, with injected
+  host implementations in headless mode. The normal browser remains the default.
+- `gameplay_helpers.js`: shared helpers previously mixed into UI files,
+  including the fruit-storage heuristic and production accumulator.
+- `ui_game.js`: browser keyboard/mouse handlers and chips moved out of `game.js`.
+- `presentation.js`: explicit non-rendering hooks. There is no fake `window`,
+  `document`, canvas, or catch-all proxy that hides unsupported dependencies.
+- `bridge.js`: bounded first-run action API, detached observations, and the
+  original `update()` entry point. Legal-action masks preflight supported
+  first-run actions; the engine remains authoritative when applying them.
+- `environment.mjs`: one private VM context per environment, controlled time,
+  seeded randomness, completion limits, and replay checkpoints. Node VM is used
+  for global-state isolation, not to execute untrusted code securely.
+
+No `ui_*.js`, `main.js`, browser renderer, or browser save codec is loaded by the
+runner. Pixel-array definitions are still evaluated because content registrations
+reference them; removing that startup overhead is deferred. No pixels are rendered.
+Original game code still contains some presentation hooks and later-game UI
+dependencies; this is a scoped extraction, not a full rewrite of every game mode.
+
+Snapshots contain the seed, settings, and action/tick history. Restore starts a
+new context and replays that history, thereby rebuilding mutable definitions,
+caches, and RNG state as well as `state`. This prioritizes correctness over cheap
+branching: restore cost grows with episode length. Checkpoints reject a different
+engine fingerprint or episode limit. Do not supply checkpoint seeds/history to a
+policy as privileged observations. Restart the Node process after editing sources.
+
+## Runtime validation
+
+The focused tests cover fresh initialization, action rejection, isolation,
+observation immutability, fixed-tick batching, seeded replay, information-screen
+achievements, and time-limit truncation:
+
+```sh
+node --test --test-concurrency=1 headless/environment.test.mjs
+```
+
+The seven tests above passed locally, and a full legal seed-1 run completed in
+the viewer. Remaining validation includes retaining a replay artifact and
+comparison against the original browser's active-play
+calculations at crop-growth, replacement/refund, weather, fruit, and reset
+boundaries. Do not create a fake successful episode by granting resources or
+editing tree level. Original-browser equivalence checks and throughput
+measurements remain separate opt-in work.
+
+## Local viewer and scripted player
+
+Start the optional loopback-only viewer manually:
+
+```sh
+node headless/watch.mjs
+```
+
+Open **http://127.0.0.1:8787**, then choose **New farm** and **Play**.
+Use one viewer tab per server. `PORT=8788 node headless/watch.mjs` selects another
+port. No installation or internet connection is needed. Stop with Ctrl+C.
+The server is an optional UI transport; the environment itself still has no
+server, browser, or network dependency.
+
+- **Pause** stops requesting work after any in-flight batch finishes (at most
+  100 ticks / 33.3 simulated seconds).
+- **Single-step** makes one policy decision and advances exactly one 333 ms tick,
+  including when the decision is to wait.
+- **Speed** targets 1×, 10×, 100×, or 1000× simulated time per wall-clock time.
+  Actual throughput depends on the machine. Rendering skips intermediate frames
+  at high speed, but the policy still makes a decision on every simulation tick.
+- The field shows crop names, growth or cress lifetime bars, and ferns; the
+  dashboard shows resources, tree level, weather, fruit, and the last 100 actions.
+- Success stops playback after the actual transcend action; the seven-game-day
+  limit stops an unsuccessful run. Closing the page stops new simulation requests.
+- New farm discards the current in-memory run. This viewer does not persist runs
+  or implement replay controls yet; the environment checkpoint API remains available.
+
+`scripted-player.mjs` exports the pure `chooseAction(observation)` policy and
+`advancePlayer(env, ticks)` runner. They import neither the viewer nor the server.
+The policy collects ferns, reads achievement-awarding information, buys unlocks,
+maintains two watercress cells, grows berries/mushrooms/flowers in a fixed layout,
+upgrades crops, uses weather, equips a stored fruit, and transcends when legal.
+It only selects actions supplied by the environment; it never grants resources.
+This is a transparent baseline heuristic, not an optimized or learned strategy.
+A seed-1 run has completed successfully; see the validation result above.
+
+The same player can run without any viewer (defaults: seed 1, one game day):
+
+```sh
+node headless/play.mjs 1 86400
+```
+
+It reports tree-level milestones as JSON lines and exits with status 0 for success
+or 2 for the episode limit. This can perform substantial simulation work; the
+command is documented here, not automatically run during implementation.
+
+**Viewer validation:** the local server and visible viewer were run through a
+complete seed-1 first transcension, increasing playback from 10× to a target of
+1000×. The policy and engine needed no fixes during the run. Playback stopped
+at completion. This is an observed baseline, not a saved replay artifact or a
+measurement of wall-clock throughput. The seven previously passing environment
+tests predate the additional upgrade metadata fields; they were not rerun here.
