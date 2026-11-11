@@ -158,7 +158,9 @@ export class HeadlessEnvironment {
     }
     // Validate before advancing time. A rejected public action leaves the
     // episode untouched; an unexpected error inside update() faults it.
-    const canonical = this.legalActions().find(candidate => {
+    // Internal validation can use the private boundary cache directly. Public
+    // legalActions()/observe() still return detached copies to callers.
+    const canonical = this.#context.headlessBridge.legalActions().find(candidate => {
       const keys = Object.keys(candidate);
       return keys.length === Object.keys(action).length && keys.every(k => candidate[k] === action[k]);
     });

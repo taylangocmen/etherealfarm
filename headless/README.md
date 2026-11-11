@@ -253,3 +253,24 @@ A truncated episode is recorded as a failure to complete, never as a faster run.
 Timing includes full trace hashing, but excludes final checkpoint compression and
 file output; initialization is reported separately. This is recorded throughput,
 not a claim about uninstrumented peak speed. No extra processes or workers run.
+
+### Unattended comparison queue
+
+After starting a baseline benchmark, launch the queue once and leave it running:
+
+```sh
+node headless/experiments.mjs --reference headless/benchmarks/baseline --out headless/benchmarks/comparison-batch --repeats 2
+```
+
+It waits up to 30 minutes for the baseline's completion record, reads its seeds
+and episode limit, then executes the comparisons sequentially with one worker.
+Each run gets a separate log, report, and checkpoint. Atomic `status.json` records
+progress and the final speedup, or the reason for failure. Any mismatch or changed
+engine between repetitions stops the queue. Ctrl+C or SIGTERM stops its child too.
+Output directories are exclusive; partial experiments are retained for diagnosis,
+not silently resumed or overwritten. Do not edit engine, policy, or recorder code
+while this queue runs. No agent needs to supervise normal execution.
+
+This queue measures and checks implementations. It does not yet optimize the
+policy: a later learning loop will generate parameter candidates, score them,
+and retain improvements automatically, using the same recording infrastructure.

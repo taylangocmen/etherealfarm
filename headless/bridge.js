@@ -3,6 +3,9 @@
 // Runs inside a private VM context. Only JSON observations and action objects
 // cross the boundary; callers do not receive state, crop objects, or RNG state.
 var headlessBridge = (function() {
+  // Private boundary cache. The host only receives detached JSON copies.
+  // Every engine tick invalidates it, including each tick of a batched wait.
+  var cachedLegalActions;
   var inspectFlags = {
     help: 'showing_help', changelog: 'showing_changelog', stats: 'showing_stats',
     fruit: 'showing_fruit_dialog'
@@ -10,6 +13,7 @@ var headlessBridge = (function() {
   var inspectMedals = {help: 2000, changelog: 2001, stats: 2002, fruit: 2006};
 
   function initialize() {
+    cachedLegalActions = undefined;
     state = createInitialState();
     state.time = state.prevtime = gameRuntime.now();
     state.saveonaction = false;
@@ -50,23 +54,29 @@ var headlessBridge = (function() {
 
   function legalActions() {
     if(state.g_numresets > 0) return [];
-    return atBoundary(function() {
+    if(cachedLegalActions) return cachedLegalActions;
+    cachedLegalActions = atBoundary(function() {
       var result = [{type: 'wait'}];
       var availableCrops = registered_crops.filter(function(id) {
         var c = crops[id];
         return state.crops[id].unlocked && c.isReal() && !c.quad;
       });
+      // getCost depends on crop counts, not the destination cell. Recoup does
+      // depend on the old crop's growth, so calculate it once per cell.
+      var costs = {};
+      availableCrops.forEach(function(id) { costs[id] = crops[id].getCost(); });
       for(var y = 0; y < state.numh; y++) {
         for(var x = 0; x < state.numw; x++) {
           var cell = state.field[y][x];
           var old = cell.getCrop();
           if(!cell.isEmpty() && !old) continue; // tree or obstacle
           if(old) result.push({type: 'delete', x: x, y: y});
+          var recoup = old ? old.getRecoup(cell) : null;
           availableCrops.forEach(function(id) {
             var c = crops[id];
             if(old && old.index == id && c.type != CROPTYPE_BRASSICA) return;
-            var cost = c.getCost();
-            if(old) cost = cost.sub(old.getRecoup(cell));
+            var cost = costs[id];
+            if(old) cost = cost.sub(recoup);
             if(state.res.can_afford(cost)) {
               result.push({type: old ? 'replace' : 'plant', x: x, y: y, crop: id});
             }
@@ -105,6 +115,7 @@ var headlessBridge = (function() {
       if(state.treelevel >= 10) result.push({type: 'transcend'});
       return result;
     });
+    return cachedLegalActions;
   }
 
   function submit(action) {
@@ -138,6 +149,7 @@ var headlessBridge = (function() {
 
   function tick() {
     if(state.g_numresets > 0) throw new Error('Episode has already finished');
+    cachedLegalActions = undefined;
     update();
     Object.keys(inspectFlags).forEach(function(page) {
       globalThis[inspectFlags[page]] = false;
