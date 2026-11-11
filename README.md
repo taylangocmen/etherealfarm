@@ -1,6 +1,8 @@
 # etherealfarm
 Ethereal Farm incremental game
 
+**Training on another Mac? Start with the [Mac handoff and execution guide](headless/HANDOFF.md).**
+
 https://lodev.org/etherealfarm/
 
 This fork also contains an initial local, code-controlled

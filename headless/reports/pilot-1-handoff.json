@@ -1,0 +1,357 @@
+{
+  "description": "Partial pilot snapshot at handoff; not live status or a resumable training checkpoint.",
+  "capturedAt": "2026-11-11T20:14:38.950321+03:00",
+  "sourceUpdatedAt": "2026-11-11T17:14:30.904Z",
+  "sourceCommit": "f7424a7737f9210889e322eacef1d30d13fc9e3f",
+  "identity": {
+    "engine": "4a3d2e239895f84859aefeb790c5ee3da4fc1fe8d99814eec77ade59abfbf682",
+    "trainer": "d04b78369b476c9a44076a61cf879df23027f0157e480668d91fc3993cfac362"
+  },
+  "config": {
+    "generations": 3,
+    "children": 4,
+    "maxSeconds": 28800,
+    "trainingSeeds": [
+      1,
+      2
+    ],
+    "validationSeeds": [
+      101,
+      102
+    ],
+    "searchSeed": 20261111
+  },
+  "statusAtCapture": "training",
+  "generationAtCapture": 0,
+  "completedCandidates": [
+    {
+      "id": "initial",
+      "parameters": {
+        "priorities": [
+          4,
+          3,
+          2,
+          1
+        ],
+        "unlockFraction": 1,
+        "upgradeFraction": 0.1,
+        "layout": [
+          [
+            "berry",
+            "flower",
+            "berry",
+            "flower",
+            "berry"
+          ],
+          [
+            "berry",
+            "mushroom",
+            null,
+            "mushroom",
+            "berry"
+          ],
+          [
+            "flower",
+            "berry",
+            null,
+            "berry",
+            "flower"
+          ],
+          [
+            "berry",
+            "mushroom",
+            "flower",
+            "mushroom",
+            "berry"
+          ],
+          [
+            "berry",
+            "brassica",
+            "berry",
+            "brassica",
+            "berry"
+          ]
+        ]
+      },
+      "episodes": [
+        {
+          "seed": 1,
+          "completed": true,
+          "truncated": false,
+          "gameSeconds": 23145.831,
+          "ticks": 69507,
+          "completionLevel": 10,
+          "awardedResin": {
+            "b": 1.4364238899358144,
+            "e": 3
+          },
+          "wallSeconds": 312.868908375,
+          "loss": 23145.831
+        },
+        {
+          "seed": 2,
+          "completed": true,
+          "truncated": false,
+          "gameSeconds": 23891.751,
+          "ticks": 71747,
+          "completionLevel": 10,
+          "awardedResin": {
+            "b": 1.4362116752917011,
+            "e": 3
+          },
+          "wallSeconds": 324.34660616699995,
+          "loss": 23891.751
+        }
+      ],
+      "loss": 23518.790999999997,
+      "successes": 2
+    },
+    {
+      "id": "g1-c1",
+      "parameters": {
+        "priorities": [
+          4.2574646938592196,
+          4.680707721039653,
+          2.676339437253773,
+          1.6776074059307575
+        ],
+        "unlockFraction": 0.4097655744216306,
+        "upgradeFraction": 0.06737384591355532,
+        "layout": [
+          [
+            "berry",
+            "flower",
+            "berry",
+            "flower",
+            "berry"
+          ],
+          [
+            "berry",
+            "mushroom",
+            null,
+            "mushroom",
+            "berry"
+          ],
+          [
+            "flower",
+            "berry",
+            null,
+            "berry",
+            "flower"
+          ],
+          [
+            "berry",
+            "mushroom",
+            "flower",
+            "mushroom",
+            "berry"
+          ],
+          [
+            "berry",
+            "brassica",
+            "berry",
+            "brassica",
+            "berry"
+          ]
+        ]
+      },
+      "episodes": [
+        {
+          "seed": 1,
+          "completed": true,
+          "truncated": false,
+          "gameSeconds": 25797.843,
+          "ticks": 77471,
+          "completionLevel": 10,
+          "awardedResin": {
+            "b": 1.4363618201174064,
+            "e": 3
+          },
+          "wallSeconds": 339.8937124170001,
+          "loss": 25797.843
+        },
+        {
+          "seed": 2,
+          "completed": true,
+          "truncated": false,
+          "gameSeconds": 27051.255,
+          "ticks": 81235,
+          "completionLevel": 10,
+          "awardedResin": {
+            "b": 1.4362113890380312,
+            "e": 3
+          },
+          "wallSeconds": 355.8174895,
+          "loss": 27051.255
+        }
+      ],
+      "loss": 26424.549,
+      "successes": 2
+    },
+    {
+      "id": "g1-c2",
+      "parameters": {
+        "priorities": [
+          5.447657248005271,
+          4.418712081387639,
+          1.5497908471152186,
+          -0.13100989256054163
+        ],
+        "unlockFraction": 0.8027138400932814,
+        "upgradeFraction": 0.02822634506307141,
+        "layout": [
+          [
+            "berry",
+            "flower",
+            "berry",
+            "flower",
+            "berry"
+          ],
+          [
+            "berry",
+            "mushroom",
+            null,
+            "mushroom",
+            "berry"
+          ],
+          [
+            "flower",
+            "berry",
+            null,
+            "berry",
+            "flower"
+          ],
+          [
+            "berry",
+            "mushroom",
+            "berry",
+            "mushroom",
+            "berry"
+          ],
+          [
+            "berry",
+            "brassica",
+            "berry",
+            "brassica",
+            "flower"
+          ]
+        ]
+      },
+      "episodes": [
+        {
+          "seed": 1,
+          "completed": false,
+          "truncated": true,
+          "gameSeconds": 28799.838,
+          "ticks": 86486,
+          "completionLevel": null,
+          "awardedResin": {
+            "b": 0,
+            "e": 0
+          },
+          "wallSeconds": 386.3485908330001,
+          "loss": 57600
+        },
+        {
+          "seed": 2,
+          "completed": false,
+          "truncated": true,
+          "gameSeconds": 28799.838,
+          "ticks": 86486,
+          "completionLevel": null,
+          "awardedResin": {
+            "b": 0,
+            "e": 0
+          },
+          "wallSeconds": 387.0741007079999,
+          "loss": 57600
+        }
+      ],
+      "loss": 57600,
+      "successes": 0
+    }
+  ],
+  "bestAtCapture": {
+    "id": "initial",
+    "parameters": {
+      "priorities": [
+        4,
+        3,
+        2,
+        1
+      ],
+      "unlockFraction": 1,
+      "upgradeFraction": 0.1,
+      "layout": [
+        [
+          "berry",
+          "flower",
+          "berry",
+          "flower",
+          "berry"
+        ],
+        [
+          "berry",
+          "mushroom",
+          null,
+          "mushroom",
+          "berry"
+        ],
+        [
+          "flower",
+          "berry",
+          null,
+          "berry",
+          "flower"
+        ],
+        [
+          "berry",
+          "mushroom",
+          "flower",
+          "mushroom",
+          "berry"
+        ],
+        [
+          "berry",
+          "brassica",
+          "berry",
+          "brassica",
+          "berry"
+        ]
+      ]
+    },
+    "episodes": [
+      {
+        "seed": 1,
+        "completed": true,
+        "truncated": false,
+        "gameSeconds": 23145.831,
+        "ticks": 69507,
+        "completionLevel": 10,
+        "awardedResin": {
+          "b": 1.4364238899358144,
+          "e": 3
+        },
+        "wallSeconds": 312.868908375,
+        "loss": 23145.831
+      },
+      {
+        "seed": 2,
+        "completed": true,
+        "truncated": false,
+        "gameSeconds": 23891.751,
+        "ticks": 71747,
+        "completionLevel": 10,
+        "awardedResin": {
+          "b": 1.4362116752917011,
+          "e": 3
+        },
+        "wallSeconds": 324.34660616699995,
+        "loss": 23891.751
+      }
+    ],
+    "loss": 23518.790999999997,
+    "successes": 2
+  },
+  "validationAtCapture": []
+}

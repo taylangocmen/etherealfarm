@@ -1,10 +1,14 @@
 # Local first-transcension environment
 
+For setup on another machine, unattended execution, migration, and current
+limitations, start with the [handoff guide](HANDOFF.md).
+
 This is the initial headless extraction for **fastest first transcension from a
 fresh save**. It uses the fork's original crop formulas, adjacency allocation,
 growth, unlocks, achievements, fruit generation, weather, and transcend action.
-There is no LLM, browser, server, network connection, package installation, or
-training algorithm involved. Use a local Node.js runtime with ES modules and
+The core environment needs no LLM, browser, server, network connection, or
+package installation. The optional local trainer is described below.
+Use a local Node.js runtime with ES modules and
 the built-in `node:vm`/`node:test` modules (Node.js 20 or newer).
 
 **Validation status:** all seven focused tests passed locally on 2026-11-11
@@ -166,9 +170,9 @@ achievements, and time-limit truncation:
 node --test --test-concurrency=1 headless/environment.test.mjs
 ```
 
-The seven tests above passed locally, and a full legal seed-1 run completed in
-the viewer. Remaining validation includes retaining a replay artifact and
-comparison against the original browser's active-play
+The seven tests above passed locally, and full legal seed-1 runs completed in
+the viewer and benchmark runner. Benchmark replay artifacts were saved locally;
+compact reports are committed. Remaining validation includes comparison against the original browser's active-play
 calculations at crop-growth, replacement/refund, weather, fruit, and reset
 boundaries. Do not create a fake successful episode by granting resources or
 editing tree level. Original-browser equivalence checks and throughput
@@ -271,9 +275,8 @@ Output directories are exclusive; partial experiments are retained for diagnosis
 not silently resumed or overwritten. Do not edit engine, policy, or recorder code
 while this queue runs. No agent needs to supervise normal execution.
 
-This queue measures and checks implementations. It does not yet optimize the
-policy: a later learning loop will generate parameter candidates, score them,
-and retain improvements automatically, using the same recording infrastructure.
+This queue measures and checks implementations. Policy optimization is handled
+separately by the evolutionary trainer below.
 
 ## Local evolutionary training
 
