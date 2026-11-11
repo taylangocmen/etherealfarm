@@ -1,0 +1,12 @@
+{"seed":1,"tick":12109,"gameSeconds":4032.297,"level":0,"completed":false,"wallSeconds":30.788519625}
+{"seed":1,"tick":20348,"gameSeconds":6775.884,"level":2,"completed":false,"wallSeconds":60.792248542}
+{"seed":1,"tick":26650,"gameSeconds":8874.45,"level":5,"completed":false,"wallSeconds":90.79307591700001}
+{"seed":1,"tick":32651,"gameSeconds":10872.783,"level":6,"completed":false,"wallSeconds":120.79507754200002}
+{"seed":1,"tick":38495,"gameSeconds":12818.835,"level":8,"completed":false,"wallSeconds":150.796471292}
+{"seed":1,"tick":44352,"gameSeconds":14769.216,"level":8,"completed":false,"wallSeconds":180.799906792}
+{"seed":1,"tick":50187,"gameSeconds":16712.271,"level":9,"completed":false,"wallSeconds":210.80273804200002}
+{"seed":1,"tick":55858,"gameSeconds":18600.714,"level":9,"completed":false,"wallSeconds":240.807462042}
+{"seed":1,"tick":61521,"gameSeconds":20486.493,"level":9,"completed":false,"wallSeconds":270.80868033300004}
+{"seed":1,"tick":67066,"gameSeconds":22332.978,"level":9,"completed":false,"wallSeconds":300.811642958}
+{"seed":1,"tick":69507,"gameSeconds":23145.831,"level":0,"completed":true,"wallSeconds":313.997161417}
+{"seed":1,"completed":true,"gameSeconds":23145.831,"ticksPerSecond":221.91675982221054,"comparison":{"reference":"/Users/taylangocmen/code/etherealfarm/headless/benchmarks/baseline","matches":true,"mismatches":[],"simulationSpeedup":2.193512964234027}}
