@@ -1,0 +1,2 @@
+# Keep compact experiment reports in Git; replay files stay local.
+*.checkpoint.json.gz

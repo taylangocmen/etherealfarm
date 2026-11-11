@@ -227,3 +227,29 @@ complete seed-1 first transcension, increasing playback from 10× to a target of
 at completion. This is an observed baseline, not a saved replay artifact or a
 measurement of wall-clock throughput. The seven previously passing environment
 tests predate the additional upgrade metadata fields; they were not rerun here.
+
+## Reproducible benchmarks
+
+`benchmark.mjs` runs the unchanged scripted policy with one worker and one decision
+per 333 ms tick. It writes exact results, level milestone ticks, action counts,
+initialization/policy/step/recording timings, runtime and Git provenance, policy
+and engine fingerprints, and a compressed replay checkpoint for each seed.
+Checkpoints stay local (ignored by Git); compact JSON reports can be committed.
+Existing output directories are rejected to avoid overwriting an experiment.
+
+```sh
+node headless/benchmark.mjs --out headless/benchmarks/baseline --seeds 1 --max-seconds 86400
+node headless/benchmark.mjs --out headless/benchmarks/candidate --seeds 1 --max-seconds 86400 --compare headless/benchmarks/baseline
+```
+
+The comparison requires identical policy and recorder source hashes, episode
+limits, action histories, final observations, and a digest covering **every**
+action and returned observation/reward/event. A mismatch produces exit status 1.
+Engine fingerprints may differ because optimization changes implementation;
+replay checkpoint restore still requires its original engine fingerprint.
+Comparisons cover exercised trajectories, not all possible actions or equivalence
+to the original browser. Keep the same seed set and episode limits for fair timing.
+A truncated episode is recorded as a failure to complete, never as a faster run.
+Timing includes full trace hashing, but excludes final checkpoint compression and
+file output; initialization is reported separately. This is recorded throughput,
+not a claim about uninstrumented peak speed. No extra processes or workers run.
