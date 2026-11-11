@@ -274,3 +274,59 @@ while this queue runs. No agent needs to supervise normal execution.
 This queue measures and checks implementations. It does not yet optimize the
 policy: a later learning loop will generate parameter candidates, score them,
 and retain improvements automatically, using the same recording infrastructure.
+
+## Local evolutionary training
+
+```sh
+node headless/train.mjs --out headless/training/pilot-1
+```
+
+This unattended pilot uses one worker, no network, and no LLM. It evaluates the
+initial policy and 12 mutated candidates (3 generations × 4 children) on seeds
+1 and 2, then evaluates the initial and selected policy on held-out seeds 101
+and 102. This is 30 episodes at most, each capped at eight simulated hours.
+Expected wall time is several hours, depending on policy behavior and the machine.
+The simulator still executes every 333 ms tick and every selected action must be
+legal. The scripted player and viewer are unchanged.
+
+The learned parameters control crop-type priority, fractions of available seeds
+allowed for unlocks/upgrades, and swaps in the field layout. Mutation preserves
+crop-role counts and tree cells. Some decisions (fern collection, information
+achievements, weather choice, and the transcend trigger) remain fixed heuristics.
+This is parameter learning by evolutionary search, not neural reinforcement
+learning or an unrestricted search over every strategy.
+
+Candidates with more successful training runs rank first; equal success counts
+are ranked by mean completion time with a timeout penalty of twice the episode
+limit. A timeout cannot beat a completed run. The best training candidate is
+retained, even if no mutation improves it. Held-out results are reported only;
+they never influence mutation or selection.
+
+The output directory contains:
+
+- `status.json`: atomic progress, candidate history, RNG state, and final held-out
+  comparison (improvement is null when either policy fails a held-out seed).
+- `best-policy.json`: selected weights/layout and training results.
+- Per-episode JSON results and compressed replay checkpoints.
+- An active checkpoint refreshed about every 30 wall-clock seconds.
+
+SIGINT/SIGTERM saves the active episode and stops. Running the exact same command
+resumes from the checkpoint, including search RNG state. A lock prevents duplicate
+writers. Source/configuration fingerprints must match; changed code requires a
+new output directory. Restore replays the saved trajectory, so resume takes time.
+Outputs are ignored by Git; source and intentionally selected reports are committed.
+Do not edit trainer, policy, or simulator sources while training is running.
+
+A short pilot with `--generations 1 --children 1 --max-seconds 3.33` exercises the
+whole scheduling/selection/held-out/reporting path; its deliberate timeouts are
+not evidence of strategy quality. A full training run is required for that.
+
+## Recorded simulator speedup
+
+The seed-1 baseline took 687.03 seconds of recorded simulation wall time. Two
+optimized repetitions took 307.47 and 313.21 seconds: median speedup **2.21×**.
+Both matched every recorded observation/action/result and all 69,507 ticks,
+finishing at exactly **23,145.831 simulated seconds**. The optimization reuses
+legal actions within a tick and crop costs within one legality calculation;
+engine rules and time integration were unchanged. These are single-seed local
+measurements, including trace recording overhead, not broad performance claims.
