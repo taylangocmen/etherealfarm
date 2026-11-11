@@ -280,6 +280,10 @@ separately by the evolutionary trainer below.
 
 ## Local evolutionary training
 
+For the separate neural reinforcement-learning experiment, see
+[fully local neural training](rl/README.md). It uses random weights, nine local
+game workers, and no imported policies or demonstrations.
+
 For concurrent evaluation with multiple CPU workers, use the
 [parallel training guide](PARALLEL_TRAINING.md). The original single-worker
 runner below remains available and retains its checkpoint format.

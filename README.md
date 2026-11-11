@@ -5,6 +5,9 @@ Ethereal Farm incremental game
 
 For multiple CPU workers, see the [parallel training guide](headless/PARALLEL_TRAINING.md).
 
+For neural learning from random weights with no demonstrations, see the
+[fully local neural training guide](headless/rl/README.md).
+
 https://lodev.org/etherealfarm/
 
 This fork also contains an initial local, code-controlled
