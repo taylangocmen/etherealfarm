@@ -5,6 +5,11 @@ engineer/agent. Commands below run from the repository root unless stated otherw
 They are instructions for the operator, not evidence that each command has been
 executed on the destination machine.
 
+**Parallel runner update:** [PARALLEL_TRAINING.md](PARALLEL_TRAINING.md) describes
+the new `train-parallel.mjs` coordinator, worker limits, and recovery protocol.
+The single-worker commands and checkpoint format described below still apply to
+the original `train.mjs`; its files are unchanged.
+
 ## 1. Objective and current state
 
 **Objective:** minimize simulated time from a fresh save to the actual first
@@ -112,12 +117,11 @@ nohup caffeinate -i node headless/train.mjs --out headless/training/mac-mini-g8-
 
 That is 64 mutated policies and up to 134 episodes. At five minutes per episode,
 134 episodes would take roughly 11 hours; failures and slower policies may take
-longer. Run only one experiment at a time until concurrency is implemented and
-measured. More physical cores do not automatically accelerate this single-worker
+longer. Run only one experiment at a time. More physical cores do not automatically accelerate this single-worker
 implementation. A new directory starts from the initial policy, not from the
 winner of another directory: cross-run warm starts are not implemented.
 
-Supported training flags are exactly `--out`, `--generations`, `--children`, and
+Supported `train.mjs` flags are exactly `--out`, `--generations`, `--children`, and
 `--max-seconds`. There is no `--workers`, `--resume`, `--seed`, GPU option, or
 wall-clock-budget option yet. Generations/children must be integers 1–100.
 Changing configuration requires a new directory; a finished run cannot simply
@@ -330,9 +334,9 @@ Next performance/search work, in suggested order:
 2. Measure remaining simulation/recording costs on the Mac mini.
 3. Add mathematically safe early rejection and staged seed evaluation. Neither is
    implemented now; every candidate currently gets full training episodes.
-4. Add a measured multi-worker scheduler, starting at two workers, then four.
-   Use isolated environments and deterministic parent selection. More cores alone
-   do not speed up the current one-worker loop.
+4. Measure the new parallel scheduler's sustained throughput and memory usage.
+   It uses isolated processes and deterministic parent selection; see the
+   parallel guide. More cores alone do not speed up the original one-worker loop.
 5. Add configurable search/train/test seeds, compute budgets, and cross-run warm
    starts. Changing the hard-coded seed arrays now changes the trainer fingerprint.
 6. Expand the policy representation (placement, crop counts, timing), then consider

@@ -3,6 +3,8 @@ Ethereal Farm incremental game
 
 **Training on another Mac? Start with the [Mac handoff and execution guide](headless/HANDOFF.md).**
 
+For multiple CPU workers, see the [parallel training guide](headless/PARALLEL_TRAINING.md).
+
 https://lodev.org/etherealfarm/
 
 This fork also contains an initial local, code-controlled

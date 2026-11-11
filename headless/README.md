@@ -280,6 +280,10 @@ separately by the evolutionary trainer below.
 
 ## Local evolutionary training
 
+For concurrent evaluation with multiple CPU workers, use the
+[parallel training guide](PARALLEL_TRAINING.md). The original single-worker
+runner below remains available and retains its checkpoint format.
+
 ```sh
 node headless/train.mjs --out headless/training/pilot-1
 ```
