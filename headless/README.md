@@ -285,6 +285,8 @@ For the separate neural reinforcement-learning experiment, see
 game workers, and no imported policies or demonstrations.
 The revised [curriculum experiment](rl_v2/README.md) adds structured action scoring,
 shorter decision horizons, milestone goals, and periodic validation.
+The [v3 resource-to-tree curriculum](rl_v3/README.md) fixes early-stage feedback
+and freezes finished evaluation workers so paired trials can complete.
 
 For concurrent evaluation with multiple CPU workers, use the
 [parallel training guide](PARALLEL_TRAINING.md). The original single-worker
