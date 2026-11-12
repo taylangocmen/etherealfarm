@@ -348,3 +348,6 @@ measurements, including trace recording overhead, not broad performance claims.
 
 For prerequisite feedback, semantic observations, and a fail-closed learning test,
 see [v4 acceptance-gated training](rl_v4/README.md).
+
+The [v5 archive-search pipeline](rl_v5/README.md) explores from saved states and
+trains only on independently replay-verified self-discoveries.

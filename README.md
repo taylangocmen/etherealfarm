@@ -22,3 +22,6 @@ benchmark contract, limitations, and validation command.
 
 The [acceptance-gated local learner](headless/rl_v4/README.md) tests spore production
 against a random baseline before permitting a longer run.
+
+For state archives and learning from self-generated successful paths, see
+[local archive search](headless/rl_v5/README.md).
