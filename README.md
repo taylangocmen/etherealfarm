@@ -7,6 +7,7 @@ For multiple CPU workers, see the [parallel training guide](headless/PARALLEL_TR
 
 For neural learning from random weights with no demonstrations, see the
 [fully local neural training guide](headless/rl/README.md).
+For the shorter revised experiment, see [local curriculum training](headless/rl_v2/README.md).
 
 https://lodev.org/etherealfarm/
 
