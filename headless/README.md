@@ -345,3 +345,6 @@ finishing at exactly **23,145.831 simulated seconds**. The optimization reuses
 legal actions within a tick and crop costs within one legality calculation;
 engine rules and time integration were unchanged. These are single-seed local
 measurements, including trace recording overhead, not broad performance claims.
+
+For prerequisite feedback, semantic observations, and a fail-closed learning test,
+see [v4 acceptance-gated training](rl_v4/README.md).

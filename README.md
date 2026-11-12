@@ -19,3 +19,6 @@ game rules and runs through Node.js without a browser or external services.
 The seven focused tests pass, and the seed-1 scripted player completed its first
 transcension in a displayed 6h 25m 45s of game time. See the headless README for the API,
 benchmark contract, limitations, and validation command.
+
+The [acceptance-gated local learner](headless/rl_v4/README.md) tests spore production
+against a random baseline before permitting a longer run.
