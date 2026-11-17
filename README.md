@@ -25,3 +25,5 @@ against a random baseline before permitting a longer run.
 
 For state archives and learning from self-generated successful paths, see
 [local archive search](headless/rl_v5/README.md).
+
+For in-browser 1×–100× speed controls, see the [Chrome extension installation guide](chrome-extension/README.md).

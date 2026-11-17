@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Ethereal Farm Speed & Run Charts",
+  "version": "0.3.3",
+  "description": "Speed controls and local run comparisons using live Ethereal Farm statistics.",
+  "minimum_chrome_version": "111",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://lodev.org/etherealfarm/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "clock.js",
+        "interaction.js",
+        "controls.js",
+        "game-data.js",
+        "run-recorder.js",
+        "charts.js"
+      ],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://lodev.org/etherealfarm/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "chart-store.js"
+      ],
+      "run_at": "document_start",
+      "world": "ISOLATED"
+    }
+  ],
+  "permissions": [
+    "storage"
+  ]
+}
